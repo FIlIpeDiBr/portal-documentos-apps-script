@@ -1,0 +1,12 @@
+{
+  "name": "portal-documentos-apps-script",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal em Google Apps Script para receber documentos de clientes: checklist por cliente, upload para o Drive e classificacao por IA",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

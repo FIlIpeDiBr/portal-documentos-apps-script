@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<base target="_top">
+<style>
+  :root {
+    --blue-dark: #1F4E79; --blue-mid: #2E75B6; --blue-light: #D6E4F0;
+    --gray-dark: #404040; --gray-mid: #666666; --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #eef2f7; color: var(--gray-dark); }
+  .page { max-width: 940px; margin: 0 auto; padding: 24px 16px 60px; }
+  a { color: var(--blue-mid); }
+
+  .top-header { background: var(--blue-dark); color: white; padding: 20px 28px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; }
+  .top-header .brand { font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+  .top-header .sub { font-size: 13px; opacity: .75; font-style: italic; }
+
+  .title-block { background: var(--white); padding: 22px 28px 16px; border-left: 1px solid #dde4ed; border-right: 1px solid #dde4ed; }
+  .title-block h1 { font-size: 24px; color: var(--blue-dark); }
+  .title-block h2 { font-size: 14px; color: var(--blue-mid); font-weight: normal; margin-top: 4px; }
+  .lista-badge { display: inline-block; margin-top: 10px; background: var(--blue-light); color: var(--blue-dark); font-size: 12px; font-weight: bold; padding: 4px 12px; border-radius: 12px; }
+
+  .instrucoes { background: white; border-left: 1px solid #dde4ed; border-right: 1px solid #dde4ed; padding: 12px 28px 18px; }
+  .instrucoes p { font-size: 13px; color: var(--gray-dark); line-height: 1.6; }
+  .instrucoes strong { color: var(--blue-dark); }
+
+  .progress-bar-wrap { background: white; border-left: 1px solid #dde4ed; border-right: 1px solid #dde4ed; padding: 0 28px 12px; }
+  .progress-label { font-size: 12px; color: var(--gray-mid); margin-bottom: 4px; }
+  .progress-bar { height: 8px; background: #dde; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue-mid); border-radius: 4px; transition: width .3s; }
+  .progress-count { font-size: 12px; color: var(--gray-mid); margin-top: 4px; text-align: right; }
+
+  .upload-wrap { background: white; border-left: 1px solid #dde4ed; border-right: 1px solid #dde4ed; padding: 4px 28px 20px; }
+  .dropzone { border: 2px dashed var(--blue-mid); border-radius: 10px; background: #f7fbff; padding: 26px 20px; text-align: center; cursor: pointer; transition: all .15s; }
+  .dropzone:hover { background: var(--blue-light); }
+  .dropzone.dragover { background: var(--blue-light); border-color: var(--blue-dark); }
+  .dropzone .dz-icon { font-size: 30px; }
+  .dropzone .dz-title { font-size: 14px; font-weight: bold; color: var(--blue-dark); margin-top: 6px; }
+  .dropzone .dz-sub { font-size: 12px; color: var(--gray-mid); margin-top: 4px; }
+  .upload-log { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .log-item { font-size: 12px; border-radius: 6px; padding: 8px 12px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+  .log-item.pend { background: #fff8e1; color: #8a6d00; }
+  .log-item.ok { background: #f0fff4; color: #1e8449; }
+  .log-item.warn { background: #fdf2f0; color: #922b21; }
+  .log-item .l-ico { flex-shrink: 0; }
+  .log-item .l-files { font-weight: bold; }
+  .log-item ul { margin: 4px 0 0 16px; }
+
+  .bloco { background: white; border-left: 1px solid #dde4ed; border-right: 1px solid #dde4ed; }
+  .bloco-header { background: var(--blue-mid); color: white; font-weight: bold; font-size: 13px; padding: 10px 28px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+  .bloco-header:hover { background: var(--blue-dark); }
+  .bloco-header .arrow { transition: transform .2s; font-size: 10px; }
+  .bloco-header.collapsed .arrow { transform: rotate(-90deg); }
+  .subheader { background: var(--blue-light); color: var(--blue-dark); font-weight: bold; font-size: 12px; padding: 7px 28px; }
+  .item { display: flex; align-items: flex-start; padding: 9px 28px; border-bottom: 1px solid #eee; gap: 12px; }
+  .item:hover { background: #f7fbff; }
+  .item.done { background: #f0fff4; }
+  .item-text { flex: 1; font-size: 13px; color: var(--gray-dark); line-height: 1.4; }
+  .item-text .obs { display: block; font-size: 11px; color: var(--gray-mid); font-style: italic; margin-top: 2px; }
+  .item-text .arquivos { display: block; font-size: 11px; margin-top: 4px; }
+  .item-num { font-weight: bold; color: var(--blue-mid); font-size: 13px; min-width: 20px; }
+  .item-status { flex-shrink: 0; align-self: center; }
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; white-space: nowrap; }
+  .badge-pend { background: #eee; color: #777; }
+  .badge-ok { background: #27ae60; color: white; }
+
+  .footer-bar { background: var(--blue-dark); color: white; text-align: center; padding: 14px; font-size: 12px; border-radius: 0 0 10px 10px; }
+
+  /* ADMIN */
+  .card { background: white; border: 1px solid #dde4ed; border-radius: 8px; padding: 20px 24px; margin-top: 16px; }
+  .card h3 { color: var(--blue-dark); font-size: 15px; border-bottom: 2px solid var(--blue-light); padding-bottom: 8px; margin-bottom: 16px; }
+  .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 180px; }
+  .field label { font-size: 12px; font-weight: bold; color: var(--gray-mid); }
+  input[type=text], select, textarea { font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #ccd; border-radius: 6px; width: 100%; }
+  textarea { resize: vertical; min-height: 120px; }
+  .btn { background: var(--blue-mid); color: white; border: none; padding: 9px 18px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; }
+  .btn:hover { background: var(--blue-dark); }
+  .btn.sec { background: #eef2f7; color: var(--blue-dark); border: 1px solid #cdd8e6; }
+  .btn.danger { background: #fdecea; color: #c0392b; border: 1px solid #f5c6cb; }
+  .btn.danger:hover { background: #f8d7da; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .cliente-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+  .cliente-row:last-child { border-bottom: none; }
+  .cliente-info { flex: 1; min-width: 200px; }
+  .cliente-info .nome { font-weight: bold; color: var(--blue-dark); font-size: 14px; }
+  .cliente-info .meta { font-size: 12px; color: var(--gray-mid); margin-top: 2px; }
+  .mini-bar { height: 6px; width: 140px; background: #dde; border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .mini-fill { height: 100%; background: var(--blue-mid); }
+  .modelo-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+  .tag-embutido { background: var(--blue-light); color: var(--blue-dark); }
+  .tag-custom { background: #d5f5e3; color: #1e8449; }
+  .msg { font-size: 12px; margin-top: 10px; padding: 8px 12px; border-radius: 6px; }
+  .msg.ok { background: #f0fff4; color: #1e8449; }
+  .msg.err { background: #fdf2f0; color: #922b21; }
+  .link-box { display: flex; gap: 8px; margin-top: 8px; }
+  .restrito { text-align: center; padding: 60px 20px; }
+  .restrito .lock { font-size: 42px; }
+  .restrito h1 { color: var(--blue-dark); font-size: 20px; margin: 12px 0 6px; }
+  .restrito p { color: var(--gray-mid); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="page" id="app"></div>
+
+<script>
+  const MODO = '<?= modo ?>';
+  const DADOS = <?!= dadosJson ?>;
+  const MARCA = DADOS.marca || {};
+  const app = document.getElementById('app');
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  // Só links https viram href: o valor vem da planilha e não deve virar "javascript:".
+  function linkSeguro(url) {
+    return /^https:\/\//.test(String(url || '')) ? String(url) : '#';
+  }
+  function marcaHtml() {
+    return '<div class="brand">' + escapeHtml(String(MARCA.nome || '').toUpperCase()) + '</div>';
+  }
+  function headerHtml(sub) {
+    return '<div class="top-header"><div>' +
+      marcaHtml() +
+      '<div class="sub">' + escapeHtml(sub || MARCA.descricao || '') + '</div>' +
+      '</div><div style="text-align:right;font-size:12px;opacity:.8;">Portal de Documentos</div></div>';
+  }
+
+  // ======================================================================
+  // TELA: ACESSO RESTRITO
+  // ======================================================================
+  function renderRestrito() {
+    app.innerHTML =
+      '<div class="top-header" style="border-radius:10px;"><div>' +
+      marcaHtml() +
+      '<div class="sub">' + escapeHtml(MARCA.descricao || '') + '</div></div></div>' +
+      '<div class="card restrito"><div class="lock">🔒</div>' +
+      '<h1>Acesso restrito</h1>' +
+      '<p>Use o link individual enviado pelo escritório para acessar o seu painel de documentos.</p></div>';
+  }
+
+  // ======================================================================
+  // TELA: PAINEL DO CLIENTE
+  // ======================================================================
+  let ITENS = [], ESTADO = {}, CLIENTE_ID = '';
+  let ADMIN_TOKEN = '', ADMIN_BASE = '', CLIENTES_BY_ID = {}, MODELOS_BY_ID = {};
+
+  function renderCliente(d) {
+    CLIENTE_ID = d.cliente.id;
+    ITENS = d.itens;
+    ESTADO = d.estado;
+
+    app.innerHTML =
+      headerHtml() +
+      '<div class="title-block">' +
+        '<h1>' + escapeHtml(d.cliente.nome) + '</h1>' +
+        '<h2>Portal de recebimento de documentos</h2>' +
+        '<span class="lista-badge">📋 Lista: ' + escapeHtml(d.cliente.modeloNome) + '</span>' +
+      '</div>' +
+      '<div class="instrucoes"><p><strong>Como enviar:</strong> Arraste seus arquivos para a caixa abaixo ' +
+        '(ou clique para selecionar). Cada documento é enviado com segurança e <strong>identificado ' +
+        'automaticamente</strong>, marcando o item correspondente como <strong>Entregue</strong>. ' +
+        'Se algum arquivo não for reconhecido, ele fica salvo e nossa equipe confere manualmente.</p></div>' +
+      '<div class="progress-bar-wrap">' +
+        '<div class="progress-label">Progresso</div>' +
+        '<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>' +
+        '<div class="progress-count" id="progressCount"></div>' +
+      '</div>' +
+      '<div class="upload-wrap">' +
+        '<div class="dropzone" id="dropzone">' +
+          '<div class="dz-icon">📤</div>' +
+          '<div class="dz-title">Arraste os documentos aqui ou clique para selecionar</div>' +
+          '<div class="dz-sub">PDF, imagens e arquivos diversos · pode enviar vários de uma vez</div>' +
+          '<input type="file" id="fileInput" multiple style="display:none">' +
+        '</div>' +
+        '<div class="upload-log" id="uploadLog"></div>' +
+      '</div>' +
+      '<div id="checklist"></div>' +
+      '<div class="footer-bar">' + escapeHtml(MARCA.nome || '') + ' &nbsp;|&nbsp; ' +
+        escapeHtml(MARCA.contato || '') + ' &nbsp;|&nbsp; Documento confidencial</div>';
+
+    renderChecklist();
+    wireUpload();
+  }
+
+  function agrupar(itens) {
+    const grupos = []; let g = null, s = null;
+    itens.forEach(function (it) {
+      if (!g || g.titulo !== it.grupo) { g = { titulo: it.grupo, subs: [] }; grupos.push(g); s = null; }
+      const key = it.sub || '';
+      if (!s || s.titulo !== key) { s = { titulo: key, itens: [] }; g.subs.push(s); }
+      s.itens.push(it);
+    });
+    return grupos;
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById('checklist');
+    container.innerHTML = '';
+    agrupar(ITENS).forEach(function (grupo) {
+      const div = document.createElement('div'); div.className = 'bloco';
+      const hdr = document.createElement('div'); hdr.className = 'bloco-header';
+      hdr.innerHTML = '<span>' + escapeHtml(grupo.titulo) + '</span><span class="arrow">▼</span>';
+      const body = document.createElement('div');
+      hdr.onclick = function () {
+        body.style.display = body.style.display === 'none' ? '' : 'none';
+        hdr.classList.toggle('collapsed');
+      };
+      div.appendChild(hdr);
+      grupo.subs.forEach(function (sub) {
+        if (sub.titulo) {
+          const sh = document.createElement('div'); sh.className = 'subheader';
+          sh.textContent = sub.titulo; body.appendChild(sh);
+        }
+        sub.itens.forEach(function (item, ii) {
+          const row = document.createElement('div'); row.className = 'item'; row.id = 'row-' + item.id;
+          row.innerHTML =
+            '<span class="item-num">' + (ii + 1) + '.</span>' +
+            '<span class="item-text">' + escapeHtml(item.label) +
+              (item.obs ? '<span class="obs">' + escapeHtml(item.obs) + '</span>' : '') +
+              '<span class="arquivos" id="arq-' + item.id + '"></span>' +
+            '</span>' +
+            '<div class="item-status" id="st-' + item.id + '"></div>';
+          body.appendChild(row);
+        });
+      });
+      div.appendChild(body);
+      container.appendChild(div);
+    });
+    aplicarEstado();
+  }
+
+  function aplicarEstado() {
+    let entregues = 0;
+    ITENS.forEach(function (item) {
+      const e = ESTADO[item.id] || { status: 'Pendente' };
+      const ok = e.status === 'Entregue';
+      if (ok) entregues++;
+      const row = document.getElementById('row-' + item.id);
+      const st = document.getElementById('st-' + item.id);
+      const arq = document.getElementById('arq-' + item.id);
+      if (!row || !st) return;
+      row.classList.toggle('done', ok);
+      st.innerHTML = ok ? '<span class="badge badge-ok">✓ Entregue</span>'
+                        : '<span class="badge badge-pend">⏳ Pendente</span>';
+      if (ok && e.links) {
+        const nomes = (e.arquivos || '').split('\n'), links = e.links.split('\n');
+        arq.innerHTML = links.map(function (l, i) {
+          return '📎 <a href="' + escapeHtml(linkSeguro(l)) + '" target="_blank" rel="noopener">' +
+            escapeHtml(nomes[i] || 'arquivo') + '</a>';
+        }).join('<br>');
+      } else if (arq) { arq.innerHTML = ''; }
+    });
+    const total = ITENS.length;
+    const pct = total ? Math.round(entregues / total * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressCount').textContent =
+      entregues + ' de ' + total + ' itens concluídos (' + pct + '%)';
+  }
+
+  // Upload
+  let fila = [], processando = false;
+  function wireUpload() {
+    const dz = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    dz.addEventListener('click', function () { fileInput.click(); });
+    fileInput.addEventListener('change', function (e) { enfileirar(e.target.files); fileInput.value = ''; });
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(function (ev) {
+      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('dragover'); });
+    });
+    dz.addEventListener('drop', function (e) {
+      if (e.dataTransfer && e.dataTransfer.files) enfileirar(e.dataTransfer.files);
+    });
+  }
+  function enfileirar(list) { for (let i = 0; i < list.length; i++) fila.push(list[i]); processarFila(); }
+  function processarFila() {
+    if (processando || !fila.length) return;
+    processando = true;
+    const file = fila.shift();
+    enviar(file, function () { processando = false; processarFila(); });
+  }
+  function enviar(file, done) {
+    const linha = addLog('pend', '⏳', 'Enviando <span class="l-files">' + escapeHtml(file.name) + '</span>…');
+    if (DADOS.limiteUpload && file.size > DADOS.limiteUpload) {
+      setLog(linha, 'warn', '⚠️', '<span class="l-files">' + escapeHtml(file.name) + '</span> passa de ' +
+        Math.round(DADOS.limiteUpload / 1048576) + ' MB e não foi enviado.');
+      done();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function () {
+      const base64 = String(reader.result).split(',')[1];
+      google.script.run
+        .withSuccessHandler(function (res) { onResultado(res, linha, file.name); done(); })
+        .withFailureHandler(function (err) {
+          setLog(linha, 'warn', '⚠️', 'Falha ao enviar <span class="l-files">' + escapeHtml(file.name) +
+            '</span>: ' + escapeHtml(err.message || String(err))); done();
+        })
+        .enviarArquivo(CLIENTE_ID, { nome: file.name, mime: file.type || 'application/octet-stream', dados: base64 });
+    };
+    reader.onerror = function () { setLog(linha, 'warn', '⚠️', 'Não foi possível ler ' + escapeHtml(file.name)); done(); };
+    reader.readAsDataURL(file);
+  }
+  function onResultado(res, linha, nome) {
+    if (!res || !res.ok) {
+      setLog(linha, 'warn', '⚠️', 'Erro com <span class="l-files">' + escapeHtml(nome) + '</span>: ' +
+        escapeHtml((res && res.erro) || 'desconhecido')); return;
+    }
+    ESTADO = res.estado; aplicarEstado();
+    if (res.naoIdentificado) {
+      const obs = res.iaIndisponivel ? ' (a identificação automática está indisponível no momento)' : '';
+      setLog(linha, 'pend', '📥', '<span class="l-files">' + escapeHtml(nome) +
+        '</span> recebido, mas não identifiquei o item automaticamente — a equipe fará a conferência.' + obs);
+    } else {
+      const itens = res.identificados.map(function (m) {
+        return '<li>' + escapeHtml(m.label) + ' <em>(' + Math.round(m.confianca * 100) + '%)</em></li>';
+      }).join('');
+      setLog(linha, 'ok', '✓', '<span class="l-files">' + escapeHtml(nome) +
+        '</span> recebido e identificado:<ul>' + itens + '</ul>');
+    }
+  }
+  function addLog(cls, ico, html) {
+    const logEl = document.getElementById('uploadLog');
+    const div = document.createElement('div'); div.className = 'log-item ' + cls;
+    div.innerHTML = '<span class="l-ico">' + ico + '</span><span>' + html + '</span>';
+    logEl.insertBefore(div, logEl.firstChild); return div;
+  }
+  function setLog(div, cls, ico, html) {
+    div.className = 'log-item ' + cls;
+    div.innerHTML = '<span class="l-ico">' + ico + '</span><span>' + html + '</span>';
+  }
+
+  // ======================================================================
+  // TELA: PAINEL ADMIN
+  // ======================================================================
+  function renderAdmin(d) {
+    const TOKEN = d.admin, BASE = d.baseUrl || '';
+    ADMIN_TOKEN = TOKEN; ADMIN_BASE = BASE;
+
+    const opcoesModelo = d.modelos.map(function (m) {
+      return '<option value="' + escapeHtml(m.id) + '">' + escapeHtml(m.nome) +
+        ' (' + m.qtd + ' itens · ' + m.tipo + ')</option>';
+    }).join('');
+
+    const ehDev = !BASE || BASE.indexOf('/dev') !== -1;
+    const aviso = ehDev
+      ? '<div class="msg err" style="margin-top:16px;">⚠️ A URL usada para gerar os links dos clientes é a de teste (<b>/dev</b>) ou não está definida. ' +
+        'Clientes anônimos <b>não conseguem abrir /dev</b>. Publique o app (Implantar → Nova implantação → App da Web) e cole a URL <b>/exec</b> abaixo.</div>'
+      : '';
+
+    app.innerHTML =
+      headerHtml('Painel administrativo') +
+      aviso +
+      '<div class="card"><h3>⚙️ Configuração</h3>' +
+        '<div class="field"><label>URL de publicação do app (termina em /exec)</label>' +
+          '<input type="text" id="appUrl" value="' + escapeHtml(d.appUrlSalvo || '') + '" ' +
+          'placeholder="https://script.google.com/macros/s/ID_DA_IMPLANTACAO/exec"></div>' +
+        '<div style="margin-top:8px;"><button class="btn" id="btnSalvarUrl">Salvar URL</button></div>' +
+        '<div id="msgUrl"></div>' +
+        '<p style="font-size:12px;color:#666;margin-top:10px;">Os links dos clientes são montados a partir desta URL. ' +
+          'Pegue a <b>/exec</b> em <i>Implantar → Gerenciar implantações</i> (não use a /dev).</p>' +
+        (d.parentUrl ? '<p style="font-size:12px;margin-top:6px;">📁 Pasta-mãe no Drive: ' +
+          '<a href="' + escapeHtml(d.parentUrl) + '" target="_blank">abrir</a></p>' : '') +
+      '</div>' +
+      '<div class="card"><h3>➕ Novo cliente</h3>' +
+        '<div class="form-row">' +
+          '<div class="field"><label>Nome do cliente</label><input type="text" id="novoNome" placeholder="Ex.: Comércio XYZ Ltda"></div>' +
+          '<div class="field"><label>Lista associada (definida agora e imutável)</label><select id="novoModelo">' + opcoesModelo + '</select></div>' +
+          '<div><button class="btn" id="btnCriarCliente">Criar cliente</button></div>' +
+        '</div>' +
+        '<div id="msgCliente"></div><div id="linkCliente"></div>' +
+      '</div>' +
+      '<div class="card"><h3>👥 Clientes</h3><div id="listaClientes"></div></div>' +
+      '<div class="card"><h3>📋 Modelos de lista</h3><div id="listaModelos"></div>' +
+        '<div style="margin-top:18px;border-top:1px dashed #cdd8e6;padding-top:16px;">' +
+          '<div class="field" style="max-width:320px;"><label>Nome do novo modelo personalizado</label>' +
+            '<input type="text" id="modNome" placeholder="Ex.: Abertura de MEI"></div>' +
+          '<div class="field" style="margin-top:10px;"><label>Documentos esperados (um por linha; use "# Grupo" para separar seções)</label>' +
+            '<textarea id="modItens" placeholder="# Documentos pessoais&#10;CPF e RG&#10;Comprovante de endereço&#10;# Documentos da empresa&#10;Contrato social"></textarea></div>' +
+          '<div style="margin-top:10px;"><button class="btn" id="btnCriarModelo">Salvar modelo</button></div>' +
+          '<div id="msgModelo"></div>' +
+        '</div>' +
+      '</div>';
+
+    renderListaClientes(d.clientes, BASE);
+    renderListaModelos(d.modelos);
+
+    document.getElementById('btnSalvarUrl').onclick = function () {
+      const url = document.getElementById('appUrl').value.trim();
+      const msg = document.getElementById('msgUrl');
+      const btn = this; btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Salvando…';
+      google.script.run
+        .withSuccessHandler(function () {
+          // recarrega o painel (o token está na própria URL) para regerar os links
+          window.top.location.reload();
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message || String(err);
+        })
+        .salvarUrlDoApp(TOKEN, url);
+    };
+
+    document.getElementById('btnCriarCliente').onclick = function () {
+      const nome = document.getElementById('novoNome').value.trim();
+      const modeloId = document.getElementById('novoModelo').value;
+      const msg = document.getElementById('msgCliente');
+      const linkDiv = document.getElementById('linkCliente');
+      if (!nome) { msg.className = 'msg err'; msg.textContent = 'Informe o nome do cliente.'; return; }
+      this.disabled = true; msg.className = 'msg'; msg.textContent = 'Criando…'; linkDiv.innerHTML = '';
+      const btn = this;
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.disabled = false;
+          msg.className = 'msg ok'; msg.textContent = 'Cliente "' + nome + '" criado.';
+          document.getElementById('novoNome').value = '';
+          renderListaClientes(res.clientes, BASE);
+          const link = res.url || (BASE ? BASE + '?cli=' + res.clienteId : '');
+          linkDiv.innerHTML = '<div class="msg ok">Link do cliente (envie para ele):</div>' +
+            '<div class="link-box"><input type="text" readonly value="' + escapeHtml(link) + '" id="lk">' +
+            '<button class="btn sec" onclick="copiar(\'lk\')">Copiar</button>' +
+            (res.pastaUrl ? '<button class="btn sec" onclick="window.open(\'' + escapeHtml(res.pastaUrl) + '\',\'_blank\')">📁 Pasta</button>' : '') +
+            '</div>';
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message || String(err);
+        })
+        .criarCliente(TOKEN, nome, modeloId);
+    };
+
+    document.getElementById('btnCriarModelo').onclick = function () {
+      const nome = document.getElementById('modNome').value.trim();
+      const texto = document.getElementById('modItens').value;
+      const msg = document.getElementById('msgModelo');
+      if (!nome) { msg.className = 'msg err'; msg.textContent = 'Informe o nome do modelo.'; return; }
+      this.disabled = true; msg.className = 'msg'; msg.textContent = 'Salvando…';
+      const btn = this;
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.disabled = false; msg.className = 'msg ok'; msg.textContent = 'Modelo salvo e disponível para reuso.';
+          document.getElementById('modNome').value = ''; document.getElementById('modItens').value = '';
+          renderListaModelos(res.modelos);
+          atualizarSelectModelos(res.modelos);
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message || String(err);
+        })
+        .criarModelo(TOKEN, nome, texto);
+    };
+  }
+
+  function renderListaClientes(clientes, BASE) {
+    const el = document.getElementById('listaClientes');
+    CLIENTES_BY_ID = {};
+    clientes.forEach(function (c) { CLIENTES_BY_ID[c.id] = c.nome; });
+    if (!clientes.length) { el.innerHTML = '<p style="font-size:13px;color:#888;">Nenhum cliente ainda.</p>'; return; }
+    el.innerHTML = clientes.map(function (c, i) {
+      const pct = c.total ? Math.round(c.entregues / c.total * 100) : 0;
+      const link = c.url || (BASE ? BASE + '?cli=' + c.id : '');
+      const botaoPasta = c.pastaUrl
+        ? '<button class="btn sec" onclick="window.open(\'' + escapeHtml(c.pastaUrl) + '\',\'_blank\')">📁 Pasta</button>'
+        : '';
+      return '<div class="cliente-row">' +
+        '<div class="cliente-info">' +
+          '<div class="nome">' + escapeHtml(c.nome) + '</div>' +
+          '<div class="meta">Lista: ' + escapeHtml(c.modeloNome) + ' · criado em ' + escapeHtml(c.criadoEm) +
+            ' · ' + c.entregues + '/' + c.total + ' itens</div>' +
+          '<div class="mini-bar"><div class="mini-fill" style="width:' + pct + '%"></div></div>' +
+        '</div>' +
+        '<div class="link-box">' +
+          '<input type="text" readonly value="' + escapeHtml(link) + '" id="cl' + i + '" style="min-width:230px;">' +
+          '<button class="btn sec" onclick="copiar(\'cl' + i + '\')">Copiar link</button>' +
+          '<button class="btn sec" onclick="window.open(\'' + escapeHtml(link) + '\',\'_blank\')">Abrir</button>' +
+          botaoPasta +
+          '<button class="btn danger" onclick="excluirClienteUI(\'' + c.id + '\')">Excluir</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function excluirClienteUI(id) {
+    const nome = CLIENTES_BY_ID[id] || 'este cliente';
+    if (!confirm('Excluir "' + nome + '"?\n\nOs registros do checklist serão removidos e a pasta do Drive irá ' +
+                 'para a LIXEIRA (recuperável por ~30 dias). Não dá para desfazer pelo painel.')) return;
+    google.script.run
+      .withSuccessHandler(function (res) {
+        renderListaClientes(res.clientes, ADMIN_BASE);
+        if (res && res.aviso) alert(res.aviso);
+      })
+      .withFailureHandler(function (err) { alert('Erro ao excluir: ' + (err.message || String(err))); })
+      .excluirCliente(ADMIN_TOKEN, id);
+  }
+
+  function renderListaModelos(modelos) {
+    const el = document.getElementById('listaModelos');
+    MODELOS_BY_ID = {};
+    modelos.forEach(function (m) { MODELOS_BY_ID[m.id] = m.nome; });
+    el.innerHTML = modelos.map(function (m) {
+      const custom = m.tipo === 'Personalizado';
+      const tag = custom ? '<span class="tag tag-custom">Personalizado</span>'
+                         : '<span class="tag tag-embutido">Embutido</span>';
+      const btn = custom
+        ? '<button class="btn danger" style="padding:4px 10px;" onclick="excluirModeloUI(\'' + escapeHtml(m.id) + '\')">Excluir</button>'
+        : '';
+      return '<div class="modelo-row"><span>' + escapeHtml(m.nome) + ' &nbsp;<span style="color:#999;">' +
+        m.qtd + ' itens</span></span><span style="display:flex;gap:8px;align-items:center;">' + tag + btn + '</span></div>';
+    }).join('');
+  }
+
+  function atualizarSelectModelos(modelos) {
+    const sel = document.getElementById('novoModelo');
+    if (!sel) return;
+    sel.innerHTML = modelos.map(function (m) {
+      return '<option value="' + escapeHtml(m.id) + '">' + escapeHtml(m.nome) +
+        ' (' + m.qtd + ' itens · ' + m.tipo + ')</option>';
+    }).join('');
+  }
+
+  function excluirModeloUI(id) {
+    const nome = MODELOS_BY_ID[id] || 'este modelo';
+    if (!confirm('Excluir o modelo "' + nome + '"?\n\nEle sai da biblioteca de listas reutilizáveis. ' +
+                 'Clientes já criados com ele NÃO são afetados (a lista deles é fixa).')) return;
+    google.script.run
+      .withSuccessHandler(function (res) {
+        renderListaModelos(res.modelos);
+        atualizarSelectModelos(res.modelos);
+      })
+      .withFailureHandler(function (err) { alert('Erro ao excluir: ' + (err.message || String(err))); })
+      .excluirModelo(ADMIN_TOKEN, id);
+  }
+
+  function copiar(id) {
+    const inp = document.getElementById(id);
+    inp.select(); inp.setSelectionRange(0, 99999);
+    try { navigator.clipboard.writeText(inp.value); } catch (e) {}
+    try { document.execCommand('copy'); } catch (e) {}
+  }
+
+  // ======================================================================
+  // ROTEAMENTO
+  // ======================================================================
+  if (MODO === 'cliente') renderCliente(DADOS);
+  else if (MODO === 'admin') renderAdmin(DADOS);
+  else renderRestrito();
+</script>
+</body>
+</html>
